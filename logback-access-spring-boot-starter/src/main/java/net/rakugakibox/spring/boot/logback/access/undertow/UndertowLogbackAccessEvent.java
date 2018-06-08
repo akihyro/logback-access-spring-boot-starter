@@ -10,12 +10,12 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.servlet.handlers.ServletRequestContext;
 import io.undertow.util.HeaderMap;
 import io.undertow.util.HeaderValues;
-import net.rakugakibox.spring.boot.logback.access.AbstractLogbackAccessEvent;
+
 
 /**
  * The Logback-access event for Undertow.
  */
-public class UndertowLogbackAccessEvent extends AbstractLogbackAccessEvent {
+public class UndertowLogbackAccessEvent extends UAbstractLogbackAccessEvent {
 
     /**
      * Constructs an instance.
@@ -23,7 +23,7 @@ public class UndertowLogbackAccessEvent extends AbstractLogbackAccessEvent {
      * @param exchange the HTTP server exchange.
      */
     public UndertowLogbackAccessEvent(HttpServerExchange exchange) {
-        super(extractHttpServletRequest(exchange), extractHttpServletResponse(exchange), new ServerAdapter(exchange));
+        super(extractHttpServletRequest(exchange), extractHttpServletResponse(exchange), exchange, new ServerAdapter(exchange));
     }
 
     /**

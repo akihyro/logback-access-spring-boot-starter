@@ -15,6 +15,8 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.spi.FilterReply;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
+import net.rakugakibox.spring.boot.logback.access.undertow.UAbstractLogbackAccessEvent;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ResourceUtils;
@@ -155,6 +157,16 @@ public class LogbackAccessContext extends AccessContext {
      * @param event the Logback-access event.
      */
     public void emit(AbstractLogbackAccessEvent event) {
+        event.setUseServerPortInsteadOfLocalPort(logbackAccessProperties.isUseServerPortInsteadOfLocalPort());
+        if (getFilterChainDecision(event) != FilterReply.DENY) {
+            callAppenders(event);
+            applicationEventPublisher.publishEvent(new LogbackAccessAppendedEvent(this, event));
+        } else {
+            applicationEventPublisher.publishEvent(new LogbackAccessDeniedEvent(this, event));
+        }
+    }
+    
+    public void emit(UAbstractLogbackAccessEvent event) {
         event.setUseServerPortInsteadOfLocalPort(logbackAccessProperties.isUseServerPortInsteadOfLocalPort());
         if (getFilterChainDecision(event) != FilterReply.DENY) {
             callAppenders(event);
