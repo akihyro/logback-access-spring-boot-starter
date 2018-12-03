@@ -1,12 +1,13 @@
-package net.rakugakibox.spring.boot.logback.access.tomcat;
+package net.rakugakibox.spring.boot.logback.access;
 
 import ch.qos.logback.access.spi.IAccessEvent;
 import net.rakugakibox.spring.boot.logback.access.test.AbstractWebContainerTest;
-import net.rakugakibox.spring.boot.logback.access.test.ContainerType;
+import net.rakugakibox.spring.boot.logback.access.test.asserts.AccessEventAssert;
 import net.rakugakibox.spring.boot.logback.access.test.queue.LogbackAccessEventQueuingAppender;
 import net.rakugakibox.spring.boot.logback.access.test.queue.LogbackAccessEventQueuingAppenderRule;
 import net.rakugakibox.spring.boot.logback.access.test.queue.LogbackAccessEventQueuingListener;
 import net.rakugakibox.spring.boot.logback.access.test.queue.LogbackAccessEventQueuingListenerRule;
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -20,13 +21,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Collections;
-
-import static net.rakugakibox.spring.boot.logback.access.test.asserts.AccessEventAssert.assertThat;
 import static net.rakugakibox.spring.boot.logback.access.test.asserts.ResponseEntityAssert.assertThat;
 
 /**
- * The test to disable the request attributes for Tomcat.
+ * The base class for testing to unuse the server port.
  */
 @RunWith(Parameterized.class)
 @EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
@@ -34,16 +32,11 @@ import static net.rakugakibox.spring.boot.logback.access.test.asserts.ResponseEn
         value = {
                 "server.useForwardHeaders=true",
                 "logback.access.config=classpath:logback-access.queue.xml",
-                "logback.access.tomcat.enableRequestAttributes=false",
+                "logback.access.useServerPortInsteadOfLocalPort=false",
         },
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-public class TomcatRequestAttributesDisablingTest extends AbstractWebContainerTest {
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Iterable<?> data() {
-        return Collections.singletonList(ContainerType.TOMCAT);
-    }
+public class ServerPortUnusingTest extends AbstractWebContainerTest {
 
     /**
      * Creates a test rule.
@@ -57,29 +50,56 @@ public class TomcatRequestAttributesDisablingTest extends AbstractWebContainerTe
                 .around(new LogbackAccessEventQueuingListenerRule());
     }
 
-    /**
-     * Tests a Logback-access event.
-     */
     @Test
-    public void logbackAccessEvent() {
+    public void should_process_request_with_forwarded_host_and_port() {
+
+        Assume.assumeTrue(!containerType.isUndertow());
 
         RequestEntity<Void> request = RequestEntity
                 .get(rest.getRestTemplate().getUriTemplateHandler().expand("/test/text"))
+                .header("X-Forwarded-Host", "forwarded-host")
                 .header("X-Forwarded-Port", "12345")
-                .header("X-Forwarded-For", "1.2.3.4")
-                .header("X-Forwarded-Proto", "https")
                 .build();
         ResponseEntity<String> response = rest.exchange(request, String.class);
         IAccessEvent event = LogbackAccessEventQueuingAppender.appendedEventQueue.pop();
         LogbackAccessEventQueuingListener.appendedEventQueue.pop();
 
         assertThat(response).hasStatusCode(HttpStatus.OK);
-        assertThat(event)
-                .hasServerName("localhost")
-                .hasLocalPort(port)
-                .hasRemoteAddr("127.0.0.1")
-                .hasRemoteHost("127.0.0.1")
-                .hasProtocol("HTTP/1.1");
+        AccessEventAssert.assertThat(event).hasLocalPort(port);
+
+    }
+
+    @Test
+    public void should_process_request_with_forwarded_host() {
+
+        Assume.assumeTrue(!containerType.isUndertow());
+
+        RequestEntity<Void> request = RequestEntity
+                .get(rest.getRestTemplate().getUriTemplateHandler().expand("/test/text"))
+                .header("X-Forwarded-Host", "forwarded-host:12345")
+                .build();
+        ResponseEntity<String> response = rest.exchange(request, String.class);
+        IAccessEvent event = LogbackAccessEventQueuingAppender.appendedEventQueue.pop();
+        LogbackAccessEventQueuingListener.appendedEventQueue.pop();
+
+        assertThat(response).hasStatusCode(HttpStatus.OK);
+        AccessEventAssert.assertThat(event).hasLocalPort(port);
+
+    }
+
+    @Test
+    public void should_process_request_with_forwarded_port() {
+
+        RequestEntity<Void> request = RequestEntity
+                .get(rest.getRestTemplate().getUriTemplateHandler().expand("/test/text"))
+                .header("X-Forwarded-Port", "12345")
+                .build();
+        ResponseEntity<String> response = rest.exchange(request, String.class);
+        IAccessEvent event = LogbackAccessEventQueuingAppender.appendedEventQueue.pop();
+        LogbackAccessEventQueuingListener.appendedEventQueue.pop();
+
+        assertThat(response).hasStatusCode(HttpStatus.OK);
+        AccessEventAssert.assertThat(event).hasLocalPort(port);
 
     }
 

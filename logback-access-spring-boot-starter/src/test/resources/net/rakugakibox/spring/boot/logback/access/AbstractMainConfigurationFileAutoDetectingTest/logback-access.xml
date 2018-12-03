@@ -1,9 +1,0 @@
-<!DOCTYPE configuration>
-
-<configuration>
-    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
-    <appender
-            name="QUEUE"
-            class="net.rakugakibox.spring.boot.logback.access.test.LogbackAccessEventQueuingAppender" />
-    <appender-ref ref="QUEUE" />
-</configuration>

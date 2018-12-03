@@ -5,6 +5,6 @@
     <filter class="net.rakugakibox.spring.boot.logback.access.test.LogbackAccessRequestHeaderDrivenFilter" />
     <appender
             name="QUEUE"
-            class="net.rakugakibox.spring.boot.logback.access.test.LogbackAccessEventQueuingAppender" />
+            class="net.rakugakibox.spring.boot.logback.access.test.queue.LogbackAccessEventQueuingAppender" />
     <appender-ref ref="QUEUE" />
 </configuration>

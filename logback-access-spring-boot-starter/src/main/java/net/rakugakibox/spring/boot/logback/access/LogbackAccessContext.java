@@ -1,13 +1,5 @@
 package net.rakugakibox.spring.boot.logback.access;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
-
 import ch.qos.logback.access.joran.JoranConfigurator;
 import ch.qos.logback.access.spi.AccessContext;
 import ch.qos.logback.core.CoreConstants;
@@ -18,6 +10,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ResourceUtils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 import static org.springframework.util.ClassUtils.addResourcePathToPackagePath;
 
 /**
@@ -154,7 +155,7 @@ public class LogbackAccessContext extends AccessContext {
      *
      * @param event the Logback-access event.
      */
-    public void emit(AbstractLogbackAccessEvent event) {
+    public void emit(PortRewriteSupport event) {
         event.setUseServerPortInsteadOfLocalPort(logbackAccessProperties.isUseServerPortInsteadOfLocalPort());
         if (getFilterChainDecision(event) != FilterReply.DENY) {
             callAppenders(event);

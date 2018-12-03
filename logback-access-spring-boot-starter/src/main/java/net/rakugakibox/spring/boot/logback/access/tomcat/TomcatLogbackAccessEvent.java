@@ -1,18 +1,19 @@
 package net.rakugakibox.spring.boot.logback.access.tomcat;
 
-import java.util.Optional;
-
 import ch.qos.logback.access.spi.AccessEvent;
 import ch.qos.logback.access.tomcat.TomcatServerAdapter;
 import lombok.Getter;
 import lombok.Setter;
 import net.rakugakibox.spring.boot.logback.access.AbstractLogbackAccessEvent;
+import net.rakugakibox.spring.boot.logback.access.AbstractOverridenAttribute;
 import org.apache.catalina.AccessLog;
 import org.apache.catalina.Globals;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.AbstractAccessLogValve;
 import org.apache.catalina.valves.RemoteIpValve;
+
+import java.util.Optional;
 
 /**
  * The Logback-access event for Tomcat.

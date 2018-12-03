@@ -30,25 +30,13 @@ public class LogbackAccessAutoConfiguration {
     /**
      * For Tomcat.
      */
-    @RequiredArgsConstructor
     @ConditionalOnBean(value = ConfigurableTomcatWebServerFactory.class)
     @Configuration
-    public static class ForTomcat {
+    public static class ForTomcat extends ForContainer {
 
-        /**
-         * The configuration properties for Logback-access.
-         */
-        private final LogbackAccessProperties logbackAccessProperties;
-
-        /**
-         * The environment.
-         */
-        private final Environment environment;
-
-        /**
-         * The application event publisher.
-         */
-        private final ApplicationEventPublisher applicationEventPublisher;
+        public ForTomcat(LogbackAccessProperties logbackAccessProperties, Environment environment, ApplicationEventPublisher applicationEventPublisher) {
+            super(logbackAccessProperties, environment, applicationEventPublisher);
+        }
 
         /**
          * Creates a Logback-access installer.
@@ -69,25 +57,13 @@ public class LogbackAccessAutoConfiguration {
     /**
      * For Jetty.
      */
-    @RequiredArgsConstructor
     @ConditionalOnBean(value = ConfigurableJettyWebServerFactory.class)
     @Configuration
-    public static class ForJetty {
+    public static class ForJetty extends ForContainer {
 
-        /**
-         * The configuration properties for Logback-access.
-         */
-        private final LogbackAccessProperties logbackAccessProperties;
-
-        /**
-         * The environment.
-         */
-        private final Environment environment;
-
-        /**
-         * The application event publisher.
-         */
-        private final ApplicationEventPublisher applicationEventPublisher;
+        public ForJetty(LogbackAccessProperties logbackAccessProperties, Environment environment, ApplicationEventPublisher applicationEventPublisher) {
+            super(logbackAccessProperties, environment, applicationEventPublisher);
+        }
 
         /**
          * Creates a Logback-access installer.
@@ -108,25 +84,13 @@ public class LogbackAccessAutoConfiguration {
     /**
      * For Undertow.
      */
-    @RequiredArgsConstructor
     @ConditionalOnBean(value = ConfigurableUndertowWebServerFactory.class)
     @Configuration
-    public static class ForUndertow {
+    public static class ForUndertow extends ForContainer {
 
-        /**
-         * The configuration properties for Logback-access.
-         */
-        private final LogbackAccessProperties logbackAccessProperties;
-
-        /**
-         * The environment.
-         */
-        private final Environment environment;
-
-        /**
-         * The application event publisher.
-         */
-        private final ApplicationEventPublisher applicationEventPublisher;
+        public ForUndertow(LogbackAccessProperties logbackAccessProperties, Environment environment, ApplicationEventPublisher applicationEventPublisher) {
+            super(logbackAccessProperties, environment, applicationEventPublisher);
+        }
 
         /**
          * Creates a Logback-access installer.
@@ -141,6 +105,29 @@ public class LogbackAccessAutoConfiguration {
             log.debug("Created a UndertowLogbackAccessInstaller: [{}]", installer);
             return installer;
         }
+
+    }
+
+    /**
+     * Base class for shared models.
+     */
+    @RequiredArgsConstructor
+    private static class ForContainer {
+
+        /**
+         * The configuration properties for Logback-access.
+         */
+        protected final LogbackAccessProperties logbackAccessProperties;
+
+        /**
+         * The environment.
+         */
+        protected final Environment environment;
+
+        /**
+         * The application event publisher.
+         */
+        protected final ApplicationEventPublisher applicationEventPublisher;
 
     }
 

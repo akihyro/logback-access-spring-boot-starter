@@ -1,19 +1,18 @@
 package net.rakugakibox.spring.boot.logback.access;
 
-import java.io.Serializable;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import ch.qos.logback.access.spi.AccessEvent;
 import ch.qos.logback.access.spi.ServerAdapter;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
+
 /**
  * The base class of Logback-access events.
  */
-public abstract class AbstractLogbackAccessEvent extends AccessEvent {
+public abstract class AbstractLogbackAccessEvent extends AccessEvent implements PortRewriteSupport {
 
     /**
      * Whether to use the server port instead of the local port.
@@ -54,54 +53,6 @@ public abstract class AbstractLogbackAccessEvent extends AccessEvent {
     @Override
     public String getRemoteUser() {
         return remoteUser.get();
-    }
-
-    /**
-     * The base class that indicates the overridden attribute.
-     * The value is optional and it is lazily evaluated.
-     * If the evaluated value is present, caches it. Otherwise, returns the original value.
-     *
-     * @param <T> the type of value.
-     */
-    protected static abstract class AbstractOverridenAttribute<T extends Serializable> implements Serializable {
-
-        /**
-         * Whether was evaluated.
-         */
-        private boolean evaluated;
-
-        /**
-         * The evaluated value.
-         */
-        private T value;
-
-        /**
-         * Returns the value.
-         *
-         * @return the value.
-         */
-        public T get() {
-            if (!evaluated) {
-                value = evaluateValueToOverride().orElse(null);
-                evaluated = true;
-            }
-            return Optional.ofNullable(value).orElseGet(this::getOriginalValue);
-        }
-
-        /**
-         * Evaluates the value to override.
-         *
-         * @return the value to override.
-         */
-        protected abstract Optional<T> evaluateValueToOverride();
-
-        /**
-         * Returns the original value.
-         *
-         * @return the original value.
-         */
-        protected abstract T getOriginalValue();
-
     }
 
     /**
