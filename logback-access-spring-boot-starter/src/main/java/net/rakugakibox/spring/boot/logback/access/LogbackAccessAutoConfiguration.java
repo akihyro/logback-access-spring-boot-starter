@@ -2,9 +2,11 @@ package net.rakugakibox.spring.boot.logback.access;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.rakugakibox.spring.boot.logback.access.LogbackAccessProperties.TeeFilterProperties;
 import net.rakugakibox.spring.boot.logback.access.jetty.JettyLogbackAccessInstaller;
 import net.rakugakibox.spring.boot.logback.access.tomcat.TomcatLogbackAccessInstaller;
 import net.rakugakibox.spring.boot.logback.access.undertow.UndertowLogbackAccessInstaller;
+
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.jetty.ConfigurableJettyWebServerFactory;
@@ -16,6 +18,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+
+import ch.qos.logback.access.servlet.TeeFilter;
+
+import static ch.qos.logback.access.AccessConstants.TEE_FILTER_INCLUDES_PARAM;
+import static ch.qos.logback.access.AccessConstants.TEE_FILTER_EXCLUDES_PARAM;
 
 /**
  * The auto-configuration for Logback-access.
@@ -163,6 +170,37 @@ public class LogbackAccessAutoConfiguration {
             LogbackAccessSecurityAttributesSaveFilter filter = new LogbackAccessSecurityAttributesSaveFilter();
             FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(filter);
             log.debug("Created a LogbackAccessSecurityAttributesSaveFilter: [{}]", filter);
+            return filterRegistrationBean;
+        }
+
+    }
+
+    /**
+     * With TeeFilter to log full request and response payloads.
+     */
+    @RequiredArgsConstructor
+    @Configuration
+    @ConditionalOnProperty(prefix = "logback.access.tee-filter", name = "enabled", matchIfMissing = false)
+    public static class WithTeeFilter {
+
+        /**
+         * The configuration properties for Logback-access.
+         */
+        private final LogbackAccessProperties logbackAccessProperties;
+
+        /**
+         * Creates the TeeFilter required to log full request and response payloads.
+         * 
+         * @return a TeeFilter required to log full request and response payloads.
+         */
+        @ConditionalOnMissingBean
+        @Bean
+        public FilterRegistrationBean<TeeFilter> logbackTeeFilter() {
+            TeeFilter filter = new TeeFilter();
+            FilterRegistrationBean<TeeFilter> filterRegistrationBean = new FilterRegistrationBean<>(filter);
+            TeeFilterProperties props = logbackAccessProperties.getTeeFilter();
+            filterRegistrationBean.addInitParameter(TEE_FILTER_INCLUDES_PARAM, props.getIncludes());
+            filterRegistrationBean.addInitParameter(TEE_FILTER_EXCLUDES_PARAM, props.getExcludes());
             return filterRegistrationBean;
         }
 

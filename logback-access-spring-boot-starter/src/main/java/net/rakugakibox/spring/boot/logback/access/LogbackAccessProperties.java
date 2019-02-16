@@ -36,6 +36,8 @@ public class LogbackAccessProperties {
      * for Tomcat.
      */
     private Tomcat tomcat = new Tomcat();
+    
+    private TeeFilterProperties teeFilter = new TeeFilterProperties();
 
     /**
      * for Tomcat.
@@ -48,6 +50,20 @@ public class LogbackAccessProperties {
          * Defaults to the presence of the RemoteIpValve.
          */
         private Boolean enableRequestAttributes;
+
+    }
+
+    /**
+     * Logback TeeFilter required to to log full request and response including payload.
+     */
+    @Data
+    public static class TeeFilterProperties {
+
+        private boolean enabled = false;
+
+        private String includes;
+
+        private String excludes;
 
     }
 
