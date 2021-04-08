@@ -33,7 +33,6 @@ public class UndertowServerPortUnusingTest extends AbstractServerPortUnusingTest
 
         assertThat(response).hasStatusCode(HttpStatus.OK);
         assertThat(event).hasLocalPort(port);
-
     }
 
     /**

@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(
         value = {
                 "server.useForwardHeaders=true",
+                "server.forward-headers-strategy=FRAMEWORK",
                 "logback.access.config=classpath:logback-access.queue.xml",
                 "logback.access.useServerPortInsteadOfLocalPort=false",
         },
